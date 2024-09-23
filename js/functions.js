@@ -2,24 +2,29 @@ const isLengthWithin = (string, maxLength) => string.length <= maxLength;
 
 const isPalindrome = (string) => {
   const normalizeString = string.replaceAll(' ', '').toLowerCase();
-  let reverseString = '';
+  let reverseNormalizeString = '';
 
   for (let i = normalizeString.length - 1; i >= 0; i--) {
-    reverseString += normalizeString[i];
+    reverseNormalizeString += normalizeString[i];
   }
 
-  return normalizeString === reverseString;
+  return normalizeString === reverseNormalizeString;
 };
 
 const getNumber = (value) => {
-  const stringValue = value.toString();
+  let newValue = value;
+
+  if (typeof value === 'number') {
+    newValue = String(value);
+  }
+
   let stringResult = '';
 
-  for (let i = 0; i < stringValue.length; i++) {
-    if (!Number.isNaN(parseInt(stringValue[i], 10))) {
-      stringResult += stringValue[i];
+  for (let i = 0; i < newValue.length; i++) {
+    if (!Number.isNaN(parseInt(newValue[i], 10))) {
+      stringResult += newValue[i];
     }
   }
 
-  return parseInt(stringResult, 10);
+  return Number(stringResult);
 };
