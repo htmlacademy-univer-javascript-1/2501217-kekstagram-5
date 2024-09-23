@@ -1,5 +1,7 @@
+// eslint-disable-next-line no-unused-vars
 const isLengthWithin = (string, maxLength) => string.length <= maxLength;
 
+// eslint-disable-next-line no-unused-vars
 const isPalindrome = (string) => {
   const normalizeString = string.replaceAll(' ', '').toLowerCase();
   let reverseNormalizeString = '';
@@ -11,6 +13,7 @@ const isPalindrome = (string) => {
   return normalizeString === reverseNormalizeString;
 };
 
+// eslint-disable-next-line no-unused-vars
 const getNumber = (value) => {
   let newValue = value;
 
