@@ -52,7 +52,7 @@ const createComment = () => ({
   id: generateCommentId(),
   avatar: `img/avatar-${getRandomInteger(1, 6)}.svg`,
   message: COMMENTS_SENTENCES[getRandomInteger(1, 6)],
-  name: NAMES[getRandomInteger(1, 6)],
+  name: NAMES[getRandomInteger(1, 10)],
 });
 
 const createPhotoDescription = () => ({
