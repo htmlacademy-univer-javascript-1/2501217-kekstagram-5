@@ -51,8 +51,8 @@ const generateCommentId = createRandomIdFromRangeGenerator(1, 750);
 const createComment = () => ({
   id: generateCommentId(),
   avatar: `img/avatar-${getRandomInteger(1, 6)}.svg`,
-  message: COMMENTS_SENTENCES[getRandomInteger(1, 6)],
-  name: NAMES[getRandomInteger(1, 10)],
+  message: COMMENTS_SENTENCES[getRandomInteger(0, COMMENTS_SENTENCES.length - 1)],
+  name: NAMES[getRandomInteger(0, NAMES.length - 1)],
 });
 
 const createPhotoDescription = () => ({
