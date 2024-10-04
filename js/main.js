@@ -6,7 +6,6 @@ const COMMENTS_SENTENCES = [
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!',
 ];
-
 const NAMES = [
   'Иван',
   'Владимр',
@@ -44,6 +43,7 @@ const createRandomIdFromRangeGenerator = (min, max) => {
   };
 };
 
+const PHOTO_COUNT = 25;
 const generatePhotoId = createRandomIdFromRangeGenerator(1, 25);
 const generatePhotoIndex = createRandomIdFromRangeGenerator(1, 25);
 const generateCommentId = createRandomIdFromRangeGenerator(1, 750);
@@ -64,4 +64,4 @@ const createPhotoDescription = () => ({
 });
 
 // eslint-disable-next-line no-unused-vars
-const photos = Array.from({length: 25}, createPhotoDescription);
+const photos = Array.from({length: PHOTO_COUNT}, createPhotoDescription);
