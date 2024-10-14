@@ -31,3 +31,20 @@ const getNumber = (value) => {
 
   return Number(stringResult);
 };
+
+const minutesInHour = 60;
+
+const getTimeInMinutes = (timeString) => {
+  const timeArray = timeString.split(':');
+  return +timeArray[0] * minutesInHour + +timeArray[1];
+};
+
+// eslint-disable-next-line no-unused-vars
+const isMeetingDuringWork = (startWorkTime, endWorkTime, startMeetingTime, meetingDuration) => {
+  const startWorkTimeInMinutes = getTimeInMinutes(startWorkTime);
+  const endWorkTimeInMinutes = getTimeInMinutes(endWorkTime);
+  const startMeetingTimeInMinutes = getTimeInMinutes(startMeetingTime);
+  const endMeetingTimeInMinutes = startMeetingTimeInMinutes + meetingDuration;
+
+  return startMeetingTimeInMinutes >= startWorkTimeInMinutes & endMeetingTimeInMinutes <= endWorkTimeInMinutes;
+};
