@@ -1,4 +1,4 @@
-import {getRandomInteger, createRandomIdFromRangeGenerator, getRandomElementFromArray} from './util';
+import {getRandomInteger, createRandomIdFromRangeGenerator, getRandomElementFromArray} from './util.js';
 
 const COMMENTS_SENTENCES = [
   'Всё отлично!',
