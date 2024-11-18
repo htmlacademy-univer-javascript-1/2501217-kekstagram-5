@@ -8,6 +8,7 @@ const COMMENTS_SENTENCES = [
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!',
 ];
+
 const NAMES = [
   'Иван',
   'Владимр',
@@ -20,6 +21,7 @@ const NAMES = [
   'Алина',
   'Злата',
 ];
+
 const PHOTO_COUNT = 25;
 const generatePhotoId = createRandomIdFromRangeGenerator(1, 25);
 const generateCommentId = createRandomIdFromRangeGenerator(1, 750);
