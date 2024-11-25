@@ -20,8 +20,19 @@ const createRandomIdFromRangeGenerator = (min, max) => {
   };
 };
 
+const checkRepeats = (arr) => {
+  const elements = {};
+  for (const element of arr) {
+    if (elements[element]) {
+      return true;
+    }
+    elements[element] = 1;
+  }
+  return false;
+};
+
 const getRandomElementFromArray = (arr) => arr[getRandomInteger(0, arr.length - 1)];
 
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-export {getRandomInteger, createRandomIdFromRangeGenerator, getRandomElementFromArray, isEscapeKey};
+export {getRandomInteger, createRandomIdFromRangeGenerator, getRandomElementFromArray, checkRepeats, isEscapeKey};
