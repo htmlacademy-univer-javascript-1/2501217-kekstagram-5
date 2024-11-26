@@ -1,4 +1,5 @@
 import { isEscapeKey, checkRepeats } from './util.js';
+import { addEventListenerToScaleElemets, removeEventListenerFromScaleElemets, addFilter, removeFilter } from './effects.js';
 
 const MAX_LENGTH_COMMENT = 140;
 const MAX_HASHTAGS_COUNT = 5;
@@ -7,6 +8,7 @@ const errorClass = 'upload-form__error-text';
 let messageHashtagError = '';
 
 const uploadForm = document.querySelector('.img-upload__form');
+const scaleImageValueElement = uploadForm.querySelector('.scale__control--value');
 const loadImgElement = uploadForm.querySelector('.img-upload__input');
 const editingWindowElement = uploadForm.querySelector('.img-upload__overlay');
 const closeElement = editingWindowElement.querySelector('.img-upload__cancel');
@@ -81,7 +83,10 @@ const closeEditingWindow = () => {
   descriptionInputElement.removeEventListener('keydown', stopPropagation);
   hashtagsInputElement.removeEventListener('input', onFormInput);
   descriptionInputElement.removeEventListener('input', onFormInput);
+  removeEventListenerFromScaleElemets();
+  removeFilter();
 
+  scaleImageValueElement.value = '100%';
   hashtagsInputElement.value = '';
   descriptionInputElement.value = '';
   loadImgElement.value = '';
@@ -104,6 +109,9 @@ const openEditingWindow = () => {
   descriptionInputElement.addEventListener('keydown', stopPropagation);
   hashtagsInputElement.addEventListener('input', onFormInput);
   descriptionInputElement.addEventListener('input', onFormInput);
+
+  addEventListenerToScaleElemets();
+  addFilter();
 };
 
 loadImgElement.addEventListener('change', openEditingWindow);
