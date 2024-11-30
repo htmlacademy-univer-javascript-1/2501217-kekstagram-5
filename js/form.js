@@ -1,5 +1,6 @@
-import { isEscapeKey, checkRepeats } from './util.js';
+import { checkRepeats, isEscapeKey, showAlert } from './util.js';
 import { addEventListenerToScaleElemets, removeEventListenerFromScaleElemets, addFilter, removeFilter } from './effects.js';
+import { sendData } from './api.js';
 
 const MAX_LENGTH_COMMENT = 140;
 const MAX_HASHTAGS_COUNT = 5;
@@ -115,3 +116,25 @@ const openEditingWindow = () => {
 };
 
 loadImgElement.addEventListener('change', openEditingWindow);
+
+const blockSubmitBtn = () => {
+  submitElement.disabled = true;
+  submitElement.textContent = 'Публикую...';
+};
+
+const unblockSubmitBtn = () => {
+  submitElement.disabled = false;
+  submitElement.textContent = 'Опубликовать';
+};
+
+uploadForm.addEventListener('submit', (evt) => {
+  evt.preventDefault();
+  blockSubmitBtn();
+
+  sendData(new FormData(evt.target))
+    .then(closeEditingWindow)
+    .catch((err) => {
+      showAlert(err.message);
+    })
+    .finally(unblockSubmitBtn);
+});
