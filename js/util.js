@@ -1,5 +1,11 @@
 const ALERT_SHOW_TIME = 5000;
 
+const getRandomInteger = (min, max) => {
+  const lower = Math.ceil(Math.min(min, max));
+  const upper = Math.floor(Math.max(min, max));
+  return Math.floor(Math.random() * (upper - lower + 1) + lower);
+};
+
 const checkRepeats = (arr) => {
   const elements = {};
   for (const element of arr) {
@@ -34,4 +40,27 @@ const showAlert = (message) => {
   }, ALERT_SHOW_TIME);
 };
 
-export {checkRepeats, isEscapeKey, showAlert};
+const getArrayRandomSample = (array, sampleSize) => {
+  if (array.length <= sampleSize) {
+    return array.slice();
+  }
+
+  const temporaryArray = array.slice();
+  const sample = [];
+  for (let i = 0; i < sampleSize; i++) {
+    const randomIndex = getRandomInteger(0, temporaryArray.length - 1);
+    sample.push(temporaryArray[randomIndex]);
+    temporaryArray.splice(randomIndex, 1);
+  }
+  return sample;
+};
+
+const debounce = (callback, timeoutDelay = 500) => {
+  let timeoutId;
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+};
+
+export {checkRepeats, isEscapeKey, showAlert, getArrayRandomSample, debounce};
