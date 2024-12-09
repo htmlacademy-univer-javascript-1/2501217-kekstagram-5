@@ -47,7 +47,7 @@ const changeBigPicture = () => {
   bigPictureDescription.textContent = currentPicture.description;
 
   clearCommentsList();
-  drawComments(currentPicture);
+  drawComments();
 };
 
 const onDocumentKeydown = (evt) => {

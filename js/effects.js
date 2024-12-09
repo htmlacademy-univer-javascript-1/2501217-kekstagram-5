@@ -16,7 +16,7 @@ const zoomOutImage = () => {
   let scaleValue = parseInt(scaleValueElement.value, 10);
   if (scaleValue > MIN_SCALE) {
     scaleValue -= STEP;
-    scaleValueElement.value = scaleValue.toString();
+    scaleValueElement.value = `${scaleValue.toString()}%`;
     imageElement.style.transform = `scale(${scaleValue / 100})`;
   }
 };
@@ -25,7 +25,7 @@ const zoomInImage = () => {
   let scaleValue = parseInt(scaleValueElement.value, 10);
   if (scaleValue < MAX_SCALE) {
     scaleValue += STEP;
-    scaleValueElement.value = scaleValue.toString();
+    scaleValueElement.value = `${scaleValue.toString()}%`;
     imageElement.style.transform = `scale(${scaleValue / 100})`;
   }
 };

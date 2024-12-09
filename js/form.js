@@ -2,6 +2,8 @@ import { checkRepeats, isEscapeKey } from './util.js';
 import { addEventListenerToScaleElemets, removeEventListenerFromScaleElemets, addFilter, removeFilter } from './effects.js';
 import { sendData } from './api.js';
 
+const DEFAULT_PHOTO = 'img/upload-default-image.jpg';
+const FILE_TYPES = ['jpg', 'jpeg', 'png'];
 const MAX_LENGTH_COMMENT = 140;
 const MAX_HASHTAGS_COUNT = 5;
 const re = /^#[A-Za-zА-Яа-я0-9]{1,19}$/;
@@ -9,7 +11,8 @@ const errorClass = 'upload-form__error-text';
 let messageHashtagError = '';
 
 const uploadForm = document.querySelector('.img-upload__form');
-const scaleImageValueElement = uploadForm.querySelector('.scale__control--value');
+const imagePreviewElement = uploadForm.querySelector('.img-upload__preview img');
+const effectsPreviewElements = document.querySelectorAll('.effects__preview');
 const loadImgElement = uploadForm.querySelector('.img-upload__input');
 const editingWindowElement = uploadForm.querySelector('.img-upload__overlay');
 const closeElement = editingWindowElement.querySelector('.img-upload__cancel');
@@ -69,54 +72,55 @@ const getMessageHashtagError = () => messageHashtagError;
 pristine.addValidator(hashtagsInputElement, validateHashtag, getMessageHashtagError);
 pristine.addValidator(descriptionInputElement, validateDescription, `Длина комментария не может составлять больше ${MAX_LENGTH_COMMENT} символов`);
 
-const getKeydownHandler = (func) => (evt) => {
-  if (isEscapeKey(evt)) {
-    evt.preventDefault();
-    func();
+const onEditingWindowKeydown = (evt) => {
+  if (isEscapeKey(evt) && evt.target !== hashtagsInputElement && evt.target !== descriptionInputElement) {
+    closeEditingWindow();
   }
 };
-
-const onInputElementKeydown = (evt) => evt.stopPropagation();
-const onEditingWindowKeydown = getKeydownHandler(closeEditingWindow);
 const onCloseElementClick = () => closeEditingWindow();
 
 function closeEditingWindow() {
   editingWindowElement.classList.add('hidden');
   document.body.classList.remove('modal-open');
 
+  loadImgElement.value = '';
+  imagePreviewElement.src = DEFAULT_PHOTO;
+  effectsPreviewElements.forEach((preview) => {
+    preview.style.removeProperty('background-image');
+  });
+
+  removeFilter();
+  removeEventListenerFromScaleElemets();
+
   closeElement.removeEventListener('click', onCloseElementClick);
   document.removeEventListener('keydown', onEditingWindowKeydown);
-  hashtagsInputElement.removeEventListener('keydown', onInputElementKeydown);
-  descriptionInputElement.removeEventListener('keydown', onInputElementKeydown);
   hashtagsInputElement.removeEventListener('input', onFormInput);
   descriptionInputElement.removeEventListener('input', onFormInput);
-  removeEventListenerFromScaleElemets();
-  removeFilter();
 
-  scaleImageValueElement.value = '100%';
-  hashtagsInputElement.value = '';
-  descriptionInputElement.value = '';
-  loadImgElement.value = '';
-
-  const errorContainers = document.querySelectorAll(`.${errorClass}`);
-  if (errorContainers) {
-    errorContainers.forEach((container) => container.setAttribute('style', 'display: none;'));
-  }
+  uploadForm.reset();
+  pristine.reset();
 }
 
 const openEditingWindow = () => {
-  editingWindowElement.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  const image = loadImgElement.files[0];
+
+  if (FILE_TYPES.some((it) => image.name.toLowerCase().endsWith(it))) {
+    imagePreviewElement.src = URL.createObjectURL(image);
+    effectsPreviewElements.forEach((preview) => {
+      preview.style.backgroundImage = `url('${URL.createObjectURL(image)}')`;
+    });
+  }
+
+  addFilter();
+  addEventListenerToScaleElemets();
 
   closeElement.addEventListener('click', onCloseElementClick);
   document.addEventListener('keydown', onEditingWindowKeydown);
-  hashtagsInputElement.addEventListener('keydown', onInputElementKeydown);
-  descriptionInputElement.addEventListener('keydown', onInputElementKeydown);
   hashtagsInputElement.addEventListener('input', onFormInput);
   descriptionInputElement.addEventListener('input', onFormInput);
 
-  addEventListenerToScaleElemets();
-  addFilter();
+  document.body.classList.add('modal-open');
+  editingWindowElement.classList.remove('hidden');
 };
 
 const onLoadImgElementChange = () => openEditingWindow();
@@ -135,6 +139,13 @@ const unblockSubmitElement = () => {
 
 const getOutsideFormClickHandler = (className, func) => (evt) => {
   if (evt.target.closest(`.${className}`) === null) {
+    func();
+  }
+};
+
+const getKeydownHandler = (func) => (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.preventDefault();
     func();
   }
 };
