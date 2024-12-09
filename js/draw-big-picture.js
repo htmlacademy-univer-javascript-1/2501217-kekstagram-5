@@ -1,5 +1,6 @@
 import {isEscapeKey} from './util.js';
 
+const COMMENTS_NUMBER_STEP = 5;
 const bigPictureElement = document.querySelector('.big-picture');
 const bigPictureCloseElement = bigPictureElement.querySelector('.big-picture__cancel');
 const bigPictureImage = bigPictureElement.querySelector('.big-picture__img').querySelector('img');
@@ -28,7 +29,7 @@ const getFormatedComment = (comment) => {
 
 const drawComments = () => {
   let commentIndex = 0;
-  for (let i = currentCommentsIndex; i < currentCommentsIndex + 5; i++) {
+  for (let i = currentCommentsIndex; i < currentCommentsIndex + COMMENTS_NUMBER_STEP; i++) {
     commentIndex = i;
     bigPictureCommentsList.appendChild(getFormatedComment(currentPicture.comments[i]));
     if (i + 1 === currentPicture.comments.length) {
@@ -52,33 +53,31 @@ const changeBigPicture = () => {
 const onDocumentKeydown = (evt) => {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
-    // eslint-disable-next-line no-use-before-define
     closeBigPicture();
   }
 };
+
+const onCloseElementClick = () => closeBigPicture();
+const onCommentsLoaderElementClick = () => drawComments();
 
 const openBigPicture = (picture) => {
   bigPictureElement.classList.remove('hidden');
   document.body.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
+  bigPictureCloseElement.addEventListener('click', onCloseElementClick);
+  bigPictureCommentsLoaderElement.addEventListener('click', onCommentsLoaderElementClick);
   currentPicture = picture;
   changeBigPicture();
 };
 
-const closeBigPicture = () => {
+function closeBigPicture() {
   bigPictureElement.classList.add('hidden');
   document.body.classList.remove('modal-open');
   bigPictureCommentsLoaderElement.classList.remove('hidden');
   document.removeEventListener('keydown', onDocumentKeydown);
+  bigPictureCloseElement.removeEventListener('click', onCloseElementClick);
+  bigPictureCommentsLoaderElement.removeEventListener('click', onCommentsLoaderElementClick);
   currentCommentsIndex = 0;
-};
-
-bigPictureCloseElement.addEventListener('click', () => {
-  closeBigPicture();
-});
-
-bigPictureCommentsLoaderElement.addEventListener('click', () => {
-  drawComments();
-});
+}
 
 export {openBigPicture};
