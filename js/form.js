@@ -39,22 +39,28 @@ const isHashtagValid = (hashtagString) => {
 
   const hashtags = hashtagString.split(/\s+/);
 
-  for (const hashtag of hashtags) {
+  if (hashtags.length === 0) {
+    return true;
+  }
+
+  if (checkRepeats(hashtags)) {
+    messageHashtagError = 'Хэш-теги не должны повторяться!';
+    return false;
+  }
+
+  const isNotValid = hashtags.some((hashtag) => {
     if (!HASHTAG_RE.test(hashtag)) {
       messageHashtagError = 'Введён невалидный хэш-тег!';
-      return false;
+      return true;
     }
     if (hashtags.length > MAX_HASHTAGS_COUNT) {
       messageHashtagError = `Превышено допустимое количество хэш-тегов: ${MAX_HASHTAGS_COUNT}!`;
-      return false;
+      return true;
     }
-    if (checkRepeats(hashtags)) {
-      messageHashtagError = 'Хэш-теги не должны повторяться!';
-      return false;
-    }
-  }
+    return false;
+  });
 
-  return true;
+  return !isNotValid;
 };
 
 const onFormInputElementInput = () => {
@@ -80,6 +86,7 @@ function closeEditingImageForm () {
   editingImageForm.classList.add('hidden');
   document.body.classList.remove('modal-open');
 
+  submitFormElement.disabled = false;
   inputImageElement.value = '';
   imagePreviewElement.src = DEFAULT_PHOTO;
   effectsPreviewElements.forEach((preview) => {

@@ -6,16 +6,7 @@ const getRandomInteger = (min, max) => {
   return Math.floor(Math.random() * (upper - lower + 1) + lower);
 };
 
-const checkRepeats = (arr) => {
-  const elements = {};
-  for (const element of arr) {
-    if (elements[element]) {
-      return true;
-    }
-    elements[element] = 1;
-  }
-  return false;
-};
+const checkRepeats = (arr) => new Set(arr).size !== arr.length;
 
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
@@ -55,7 +46,7 @@ const getArrayRandomSample = (array, sampleSize) => {
   return sample;
 };
 
-const debounce = (cb, timeoutDelay = 500) => {
+const debounce = (cb, timeoutDelay) => {
   let timeoutId;
   return (...rest) => {
     clearTimeout(timeoutId);

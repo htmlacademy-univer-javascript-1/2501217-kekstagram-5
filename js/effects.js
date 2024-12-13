@@ -38,7 +38,6 @@ const EffectsParams = {
 };
 
 let currentEffectType;
-let currentEffectClass;
 let currentEffectOptions;
 
 const getEffectOptions = (min, max, step, funcTo, funcFrom) => ({
@@ -55,14 +54,13 @@ const getEffectOptions = (min, max, step, funcTo, funcFrom) => ({
   }
 });
 
-const ChangeEffectParams = (effectClass, effectType, effectOptions) => {
+const ChangeEffectParams = (effectType, effectOptions) => {
   if (effectType === 'none') {
     sliderElementContainer.setAttribute('hidden', true);
   } else {
     sliderElementContainer.removeAttribute('hidden');
   }
 
-  currentEffectClass = effectClass;
   currentEffectType = effectType;
   currentEffectOptions = effectOptions;
 };
@@ -70,33 +68,31 @@ const ChangeEffectParams = (effectClass, effectType, effectOptions) => {
 const changeEffect = (effectID) => {
   switch (effectID) {
     case 'effect-none':
-      ChangeEffectParams('effects__preview--none', 'none',
+      ChangeEffectParams('none',
         getEffectOptions(EffectsParams.NONE.MIN, EffectsParams.NONE.MAX, EffectsParams.NONE.STEP, (value) => value, (value) => parseFloat(value)));
       break;
     case 'effect-chrome':
-      ChangeEffectParams('effects__preview--chrome', 'grayscale',
+      ChangeEffectParams('grayscale',
         getEffectOptions(EffectsParams.CHROME.MIN, EffectsParams.CHROME.MAX, EffectsParams.CHROME.STEP, (value) => value.toFixed(1), (value) => parseFloat(value)));
       break;
     case 'effect-sepia':
-      ChangeEffectParams('effects__preview--sepia', 'sepia',
+      ChangeEffectParams('sepia',
         getEffectOptions(EffectsParams.SEPIA.MIN, EffectsParams.SEPIA.MAX, EffectsParams.SEPIA.STEP, (value) => value.toFixed(1), (value) => parseFloat(value)));
       break;
     case 'effect-marvin':
-      ChangeEffectParams('effects__preview--marvin', 'invert',
+      ChangeEffectParams('invert',
         getEffectOptions(EffectsParams.MARVIN.MIN, EffectsParams.MARVIN.MAX, EffectsParams.MARVIN.STEP, (value) => `${value}%`, (value) => parseFloat(value)));
       break;
     case 'effect-phobos':
-      ChangeEffectParams('effects__preview--phobos', 'blur',
+      ChangeEffectParams('blur',
         getEffectOptions(EffectsParams.PHOBOS.MIN, EffectsParams.PHOBOS.MAX, EffectsParams.PHOBOS.STEP, (value) => `${value.toFixed(1)}px`, (value) => parseFloat(value)));
       break;
     case 'effect-heat':
-      ChangeEffectParams('effects__preview--heat', 'brightness',
+      ChangeEffectParams('brightness',
         getEffectOptions(EffectsParams.HEAT.MIN, EffectsParams.HEAT.MAX, EffectsParams.HEAT.STEP, (value) => value.toFixed(1), (value) => parseFloat(value)));
       break;
   }
 
-  imageElement.className = '';
-  imageElement.classList.add(currentEffectClass);
   sliderElement.noUiSlider.updateOptions(currentEffectOptions);
 };
 
@@ -109,7 +105,8 @@ const onEffectChange = (evt) => {
 const addEffect = () => {
   effectValueElement.value = 1;
   currentEffectType = 'none';
-  noUiSlider.create(sliderElement, getEffectOptions(0, 1, 0.1, (value) => value, (value) => parseFloat(value)));
+  currentEffectOptions = getEffectOptions(EffectsParams.NONE.MIN, EffectsParams.NONE.MAX, EffectsParams.NONE.STEP, (value) => value, (value) => parseFloat(value));
+  noUiSlider.create(sliderElement, currentEffectOptions);
   sliderElementContainer.setAttribute('hidden', true);
   effectsContainerElement.addEventListener('change', onEffectChange);
 
@@ -121,8 +118,8 @@ const addEffect = () => {
 
 const removeEffect = () => {
   effectsContainerElement.removeEventListener('change', onEffectChange);
-  imageElement.className = '';
   document.getElementById('effect-none').checked = true;
+  imageElement.style.filter = '';
   sliderElement.noUiSlider.destroy();
 };
 
