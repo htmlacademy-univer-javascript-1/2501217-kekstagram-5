@@ -18,7 +18,7 @@ const clearCommentsList = () => {
   bigPictureCommentsList.innerHTML = '';
 };
 
-const getFormatedComment = (comment) => {
+const getCommentElement = (comment) => {
   const formatedComment = bigPictureCommentTemplate.cloneNode(true);
   const commentAutorImage = formatedComment.querySelector('.social__picture');
   commentAutorImage.src = comment.avatar;
@@ -31,7 +31,7 @@ const drawComments = () => {
   let commentIndex = 0;
   for (let i = currentCommentsIndex; i < currentCommentsIndex + COMMENTS_NUMBER_STEP; i++) {
     commentIndex = i;
-    bigPictureCommentsList.appendChild(getFormatedComment(currentPicture.comments[i]));
+    bigPictureCommentsList.appendChild(getCommentElement(currentPicture.comments[i]));
     if (i + 1 === currentPicture.comments.length) {
       bigPictureCommentsLoaderElement.classList.add('hidden');
       break;
@@ -61,13 +61,13 @@ const onCloseElementClick = () => closeBigPicture();
 const onCommentsLoaderElementClick = () => drawComments();
 
 const openBigPicture = (picture) => {
-  bigPictureElement.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  currentPicture = picture;
+  changeBigPicture();
   document.addEventListener('keydown', onDocumentKeydown);
   bigPictureCloseElement.addEventListener('click', onCloseElementClick);
   bigPictureCommentsLoaderElement.addEventListener('click', onCommentsLoaderElementClick);
-  currentPicture = picture;
-  changeBigPicture();
+  document.body.classList.add('modal-open');
+  bigPictureElement.classList.remove('hidden');
 };
 
 function closeBigPicture() {

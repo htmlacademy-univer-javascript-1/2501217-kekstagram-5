@@ -1,152 +1,154 @@
-import { checkRepeats, isEscapeKey } from './util.js';
-import { addEventListenerToScaleElemets, removeEventListenerFromScaleElemets, addFilter, removeFilter } from './effects.js';
-import { sendData } from './api.js';
+import {checkRepeats, isEscapeKey} from './util.js';
+import {addEffect, removeEffect} from './effects.js';
+import {addEventListenerToScaleElements, removeEventListenerFromScaleElements, setStandartImageSize} from './scale.js';
+import {sendData} from './api.js';
 
 const DEFAULT_PHOTO = 'img/upload-default-image.jpg';
-const FILE_TYPES = ['jpg', 'jpeg', 'png'];
+const ALLOWED_FILE_TYPES = ['jpg', 'jpeg', 'png'];
 const MAX_LENGTH_COMMENT = 140;
 const MAX_HASHTAGS_COUNT = 5;
-const re = /^#[A-Za-zА-Яа-я0-9]{1,19}$/;
-const errorClass = 'upload-form__error-text';
-let messageHashtagError = '';
+const HASHTAG_RE = /^#[A-Za-zА-Яа-я0-9]{1,19}$/;
+const PRISTINE_ERROR_CLASS = 'upload-form__error-text';
 
-const uploadForm = document.querySelector('.img-upload__form');
+const uploadForm = document.getElementById('upload-select-image');
 const imagePreviewElement = uploadForm.querySelector('.img-upload__preview img');
-const effectsPreviewElements = document.querySelectorAll('.effects__preview');
-const loadImgElement = uploadForm.querySelector('.img-upload__input');
-const editingWindowElement = uploadForm.querySelector('.img-upload__overlay');
-const closeElement = editingWindowElement.querySelector('.img-upload__cancel');
-const submitElement = uploadForm.querySelector('.img-upload__submit');
+const effectsPreviewElements = uploadForm.querySelectorAll('.effects__preview');
+const inputImageElement = uploadForm.querySelector('.img-upload__input');
+const editingImageForm = uploadForm.querySelector('.img-upload__overlay');
+const closeFormElement = editingImageForm.querySelector('.img-upload__cancel');
+const submitFormElement = uploadForm.querySelector('.img-upload__submit');
 const hashtagsInputElement = uploadForm.querySelector('.text__hashtags');
 const descriptionInputElement = uploadForm.querySelector('.text__description');
-const successForm = document.querySelector('#success').content.querySelector('.success');
+const successForm = document.getElementById('success').content.querySelector('.success');
 const successCloseElement = successForm.querySelector('.success__button');
-const errorForm = document.querySelector('#error').content.querySelector('.error');
+const errorForm = document.getElementById('error').content.querySelector('.error');
 const errorCloseElement = errorForm.querySelector('.error__button');
 
 const pristine = new Pristine(uploadForm, {
   classTo: 'img-upload__field-wrapper',
   errorTextParent: 'img-upload__field-wrapper',
   errorTextTag: 'div',
-  errorTextClass: errorClass
+  errorTextClass: PRISTINE_ERROR_CLASS
 }, true);
 
-const validateHashtag = (hashtagString) => {
+let messageHashtagError = '';
+
+const isHashtagValid = (hashtagString) => {
   messageHashtagError = '';
   hashtagString = hashtagString.trim().toLowerCase();
-  const hashtags = hashtagString.split(/\s+/);
 
   if(!hashtagString) {
     return true;
   }
 
-  for (const hashtag of hashtags) {
-    if (!re.test(hashtag)) {
+  const hashtags = hashtagString.split(/\s+/);
+
+  hashtags.forEach((hashtag) => {
+    if (!HASHTAG_RE.test(hashtag)) {
       messageHashtagError = 'Введён невалидный хэш-тег!';
-      return false;
-    }
-    if (hashtags.length > MAX_HASHTAGS_COUNT) {
+    } else if (hashtags.length > MAX_HASHTAGS_COUNT) {
       messageHashtagError = `Превышено допустимое количество хэш-тегов: ${MAX_HASHTAGS_COUNT}!`;
-      return false;
-    }
-    if (checkRepeats(hashtags)) {
+    } else if (checkRepeats(hashtags)) {
       messageHashtagError = 'Хэш-теги не должны повторяться!';
-      return false;
+    } else {
+      return true;
     }
-  }
-  return true;
+    return false;
+  });
 };
 
-const onFormInput = () => {
+const onFormInputElementInput = () => {
   if (pristine.validate()) {
-    submitElement.disabled = false;
+    submitFormElement.disabled = false;
   } else {
-    submitElement.disabled = true;
+    submitFormElement.disabled = true;
   }
 };
 
-const validateDescription = (value) => value.length <= MAX_LENGTH_COMMENT;
+const isDescriptionValid = (descriptionString) => descriptionString.length <= MAX_LENGTH_COMMENT;
 
 const getMessageHashtagError = () => messageHashtagError;
 
-pristine.addValidator(hashtagsInputElement, validateHashtag, getMessageHashtagError);
-pristine.addValidator(descriptionInputElement, validateDescription, `Длина комментария не может составлять больше ${MAX_LENGTH_COMMENT} символов`);
+pristine.addValidator(hashtagsInputElement, isHashtagValid, getMessageHashtagError);
+pristine.addValidator(descriptionInputElement, isDescriptionValid, `Длина комментария не может составлять больше ${MAX_LENGTH_COMMENT} символов`);
 
-const onEditingWindowKeydown = (evt) => {
+const onEditingImageFormKeydown = (evt) => {
   if (isEscapeKey(evt) && evt.target !== hashtagsInputElement && evt.target !== descriptionInputElement) {
-    closeEditingWindow();
+    closeEditingImageForm();
   }
 };
-const onCloseElementClick = () => closeEditingWindow();
 
-function closeEditingWindow() {
-  editingWindowElement.classList.add('hidden');
+const onCloseFormElementClick = () => closeEditingImageForm();
+
+function closeEditingImageForm() {
+  editingImageForm.classList.add('hidden');
   document.body.classList.remove('modal-open');
 
-  loadImgElement.value = '';
+  inputImageElement.value = '';
   imagePreviewElement.src = DEFAULT_PHOTO;
   effectsPreviewElements.forEach((preview) => {
     preview.style.removeProperty('background-image');
   });
 
-  removeFilter();
-  removeEventListenerFromScaleElemets();
+  removeEffect();
+  setStandartImageSize();
+  removeEventListenerFromScaleElements();
 
-  closeElement.removeEventListener('click', onCloseElementClick);
-  document.removeEventListener('keydown', onEditingWindowKeydown);
-  hashtagsInputElement.removeEventListener('input', onFormInput);
-  descriptionInputElement.removeEventListener('input', onFormInput);
+  closeFormElement.removeEventListener('click', onCloseFormElementClick);
+  document.removeEventListener('keydown', onEditingImageFormKeydown);
+  hashtagsInputElement.removeEventListener('input', onFormInputElementInput);
+  descriptionInputElement.removeEventListener('input', onFormInputElementInput);
 
   uploadForm.reset();
   pristine.reset();
 }
 
-const openEditingWindow = () => {
-  const image = loadImgElement.files[0];
+const openEditingImageForm = () => {
+  const image = inputImageElement.files[0];
 
-  if (FILE_TYPES.some((it) => image.name.toLowerCase().endsWith(it))) {
+  if (ALLOWED_FILE_TYPES.some((it) => image.name.toLowerCase().endsWith(it))) {
     imagePreviewElement.src = URL.createObjectURL(image);
     effectsPreviewElements.forEach((preview) => {
       preview.style.backgroundImage = `url('${URL.createObjectURL(image)}')`;
     });
   }
 
-  addFilter();
-  addEventListenerToScaleElemets();
+  addEffect();
+  addEventListenerToScaleElements();
 
-  closeElement.addEventListener('click', onCloseElementClick);
-  document.addEventListener('keydown', onEditingWindowKeydown);
-  hashtagsInputElement.addEventListener('input', onFormInput);
-  descriptionInputElement.addEventListener('input', onFormInput);
+  closeFormElement.addEventListener('click', onCloseFormElementClick);
+  document.addEventListener('keydown', onEditingImageFormKeydown);
+  hashtagsInputElement.addEventListener('input', onFormInputElementInput);
+  descriptionInputElement.addEventListener('input', onFormInputElementInput);
 
   document.body.classList.add('modal-open');
-  editingWindowElement.classList.remove('hidden');
+  editingImageForm.classList.remove('hidden');
 };
 
-const onLoadImgElementChange = () => openEditingWindow();
+const oninputImageElementChange = () => openEditingImageForm();
 
-loadImgElement.addEventListener('change', onLoadImgElementChange);
+inputImageElement.addEventListener('change', oninputImageElementChange);
 
-const blockSubmitElement = () => {
-  submitElement.disabled = true;
-  submitElement.textContent = 'Публикация...';
+const blockSubmitFormElement = () => {
+  submitFormElement.disabled = true;
+  submitFormElement.textContent = 'Публикация...';
 };
 
-const unblockSubmitElement = () => {
-  submitElement.disabled = false;
-  submitElement.textContent = 'Опубликовать';
+const unblockSubmitFormElement = () => {
+  submitFormElement.disabled = false;
+  submitFormElement.textContent = 'Опубликовать';
 };
 
-const getOutsideFormClickHandler = (className, func) => (evt) => {
+const getOutsideFormClickHandler = (className, cb) => (evt) => {
   if (evt.target.closest(`.${className}`) === null) {
-    func();
+    cb();
   }
 };
 
-const getKeydownHandler = (func) => (evt) => {
+const getKeydownHandler = (cb) => (evt) => {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
-    func();
+    cb();
   }
 };
 
@@ -160,44 +162,44 @@ const onErrorFormKeydown = getKeydownHandler(hideErrorForm);
 function hideSuccessForm() {
   document.removeEventListener('click', onOutsideSuccessFormClick);
   document.removeEventListener('keydown', onSuccessFormKeydown);
-  document.body.removeChild(successForm);
   successCloseElement.removeEventListener('click', onSuccessCloseElementClick);
+  document.body.removeChild(successForm);
 }
 
 function hideErrorForm() {
-  editingWindowElement.classList.remove('hidden');
-  document.addEventListener('keydown', onEditingWindowKeydown);
-  document.body.removeChild(errorForm);
   errorCloseElement.removeEventListener('click', onErrorCloseElementClick);
   document.removeEventListener('click', onOutsideErrorFormClick);
   document.removeEventListener('keydown', onErrorFormKeydown);
+  document.body.removeChild(errorForm);
+  document.addEventListener('keydown', onEditingImageFormKeydown);
+  editingImageForm.classList.remove('hidden');
 }
 
 const showSuccessForm = () => {
   successCloseElement.addEventListener('click', onSuccessCloseElementClick);
-  document.body.appendChild(successForm);
   document.addEventListener('click', onOutsideSuccessFormClick);
   document.addEventListener('keydown', onSuccessFormKeydown);
+  document.body.appendChild(successForm);
 };
 
 const showErrorForm = () => {
-  editingWindowElement.classList.add('hidden');
-  document.removeEventListener('keydown', onEditingWindowKeydown);
+  document.removeEventListener('keydown', onEditingImageFormKeydown);
+  editingImageForm.classList.add('hidden');
   errorCloseElement.addEventListener('click', onErrorCloseElementClick);
-  document.body.appendChild(errorForm);
   document.addEventListener('click', onOutsideErrorFormClick);
   document.addEventListener('keydown', onErrorFormKeydown);
+  document.body.appendChild(errorForm);
 };
 
 uploadForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
-  blockSubmitElement();
+  blockSubmitFormElement();
 
   sendData(new FormData(evt.target))
     .then(() => {
-      closeEditingWindow();
+      closeEditingImageForm();
       showSuccessForm();
     })
     .catch(showErrorForm)
-    .finally(unblockSubmitElement);
+    .finally(unblockSubmitFormElement);
 });

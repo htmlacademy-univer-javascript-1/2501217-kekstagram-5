@@ -1,7 +1,7 @@
 import {openBigPicture} from './draw-big-picture.js';
 
 const picturesListElement = document.querySelector('.pictures');
-const pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
+const pictureTemplate = document.getElementById('picture').content.querySelector('.picture');
 
 const getPictureClickHandler = (pictures) => (evt) => {
   const pictureElement = evt.target.closest('.picture');
@@ -11,7 +11,7 @@ const getPictureClickHandler = (pictures) => (evt) => {
   }
 };
 
-const renderPicturesList = (pictures) => {
+const renderPictures = (pictures) => {
   const picturesListFragment = document.createDocumentFragment();
 
   pictures.forEach(({url, description, likes, comments}) => {
@@ -25,7 +25,8 @@ const renderPicturesList = (pictures) => {
   });
 
   picturesListElement.appendChild(picturesListFragment);
-  picturesListElement.addEventListener('click', getPictureClickHandler(pictures));
+  const onPictureClick = getPictureClickHandler(pictures);
+  picturesListElement.addEventListener('click', onPictureClick);
 };
 
-export {renderPicturesList};
+export {renderPictures};
