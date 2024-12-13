@@ -62,6 +62,7 @@ const onCommentsLoaderElementClick = () => drawComments();
 
 const openBigPicture = (picture) => {
   currentPicture = picture;
+  currentCommentsIndex = 0;
   changeBigPicture();
   document.addEventListener('keydown', onDocumentKeydown);
   bigPictureCloseElement.addEventListener('click', onCloseElementClick);
@@ -77,7 +78,6 @@ function closeBigPicture () {
   document.removeEventListener('keydown', onDocumentKeydown);
   bigPictureCloseElement.removeEventListener('click', onCloseElementClick);
   bigPictureCommentsLoaderElement.removeEventListener('click', onCommentsLoaderElementClick);
-  currentCommentsIndex = 0;
 }
 
 export {openBigPicture};
