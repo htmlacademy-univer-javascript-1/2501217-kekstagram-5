@@ -1,124 +1,100 @@
+const CLASS_HIDDEN = 'hidden';
+
 const imageElement = document.querySelector('.img-upload__preview img');
 const effectsContainerElement = document.querySelector('.effects__list');
 const sliderElementContainer = document.querySelector('.img-upload__effect-level');
 const sliderElement = sliderElementContainer.querySelector('.effect-level__slider');
 const effectValueElement = sliderElementContainer.querySelector('.effect-level__value');
 
-const EffectsParams = {
+const EffectsConfig = {
   NONE: {
-    MIN: 0,
-    MAX: 1,
-    STEP: 0.1
+    id: 'effect-none',
+    type: 'none',
+    params: { min: 0, max: 1, step: 0.1 },
+    format: (value) => value,
+    parse: (value) => parseFloat(value),
   },
   CHROME: {
-    MIN: 0,
-    MAX: 1,
-    STEP: 0.1
+    id: 'effect-chrome',
+    type: 'grayscale',
+    params: { min: 0, max: 1, step: 0.1 },
+    format: (value) => value.toFixed(1),
+    parse: (value) => parseFloat(value),
   },
   SEPIA: {
-    MIN: 0,
-    MAX: 1,
-    STEP: 0.1
+    id: 'effect-sepia',
+    type: 'sepia',
+    params: { min: 0, max: 1, step: 0.1 },
+    format: (value) => value.toFixed(1),
+    parse: (value) => parseFloat(value),
   },
   MARVIN: {
-    MIN: 0,
-    MAX: 100,
-    STEP: 1
+    id: 'effect-marvin',
+    type: 'invert',
+    params: { min: 0, max: 100, step: 1 },
+    format: (value) => `${value}%`,
+    parse: (value) => parseFloat(value),
   },
   PHOBOS: {
-    MIN: 0,
-    MAX: 3,
-    STEP: 0.1
+    id: 'effect-phobos',
+    type: 'blur',
+    params: { min: 0, max: 3, step: 0.1 },
+    format: (value) => `${value.toFixed(1)}px`,
+    parse: (value) => parseFloat(value),
   },
   HEAT: {
-    MIN: 1,
-    MAX: 3,
-    STEP: 0.1
-  }
+    id: 'effect-heat',
+    type: 'brightness',
+    params: { min: 1, max: 3, step: 0.1 },
+    format: (value) => value.toFixed(1),
+    parse: (value) => parseFloat(value),
+  },
 };
 
-let currentEffectType;
-let currentEffectOptions;
+let currentEffect = EffectsConfig.NONE;
 
-const getEffectOptions = (min, max, step, funcTo, funcFrom) => ({
+const getSliderOptions = ({ params, format, parse }) => ({
   range: {
-    min: min,
-    max: max,
+    min: params.min,
+    max: params.max,
   },
-  start: max,
-  step: step,
+  start: params.max,
+  step: params.step,
   connect: 'lower',
-  format: {
-    to: funcTo,
-    from: funcFrom
-  }
+  format: { to: format, from: parse },
 });
 
-const ChangeEffectParams = (effectType, effectOptions) => {
-  if (effectType === 'none') {
-    sliderElementContainer.setAttribute('hidden', true);
+const setEffectParams = (effect) => {
+  if (effect.type === 'none') {
+    sliderElementContainer.classList.add(CLASS_HIDDEN);
   } else {
-    sliderElementContainer.removeAttribute('hidden');
+    sliderElementContainer.classList.remove(CLASS_HIDDEN);
   }
 
-  currentEffectType = effectType;
-  currentEffectOptions = effectOptions;
-};
-
-const changeEffect = (effectID) => {
-  switch (effectID) {
-    case 'effect-none':
-      ChangeEffectParams('none',
-        getEffectOptions(EffectsParams.NONE.MIN, EffectsParams.NONE.MAX, EffectsParams.NONE.STEP, (value) => value, (value) => parseFloat(value)));
-      break;
-    case 'effect-chrome':
-      ChangeEffectParams('grayscale',
-        getEffectOptions(EffectsParams.CHROME.MIN, EffectsParams.CHROME.MAX, EffectsParams.CHROME.STEP, (value) => value.toFixed(1), (value) => parseFloat(value)));
-      break;
-    case 'effect-sepia':
-      ChangeEffectParams('sepia',
-        getEffectOptions(EffectsParams.SEPIA.MIN, EffectsParams.SEPIA.MAX, EffectsParams.SEPIA.STEP, (value) => value.toFixed(1), (value) => parseFloat(value)));
-      break;
-    case 'effect-marvin':
-      ChangeEffectParams('invert',
-        getEffectOptions(EffectsParams.MARVIN.MIN, EffectsParams.MARVIN.MAX, EffectsParams.MARVIN.STEP, (value) => `${value}%`, (value) => parseFloat(value)));
-      break;
-    case 'effect-phobos':
-      ChangeEffectParams('blur',
-        getEffectOptions(EffectsParams.PHOBOS.MIN, EffectsParams.PHOBOS.MAX, EffectsParams.PHOBOS.STEP, (value) => `${value.toFixed(1)}px`, (value) => parseFloat(value)));
-      break;
-    case 'effect-heat':
-      ChangeEffectParams('brightness',
-        getEffectOptions(EffectsParams.HEAT.MIN, EffectsParams.HEAT.MAX, EffectsParams.HEAT.STEP, (value) => value.toFixed(1), (value) => parseFloat(value)));
-      break;
-  }
-
-  sliderElement.noUiSlider.updateOptions(currentEffectOptions);
+  currentEffect = effect;
+  sliderElement.noUiSlider.updateOptions(getSliderOptions(effect));
 };
 
 const onEffectChange = (evt) => {
-  if (evt.target.closest('.effects__item')) {
-    changeEffect(evt.target.id);
-  }
+  setEffectParams(Object.values(EffectsConfig).find((config) => config.id === evt.target.id));
 };
 
 const addEffect = () => {
-  effectValueElement.value = 1;
-  currentEffectType = 'none';
-  currentEffectOptions = getEffectOptions(EffectsParams.NONE.MIN, EffectsParams.NONE.MAX, EffectsParams.NONE.STEP, (value) => value, (value) => parseFloat(value));
-  noUiSlider.create(sliderElement, currentEffectOptions);
-  sliderElementContainer.setAttribute('hidden', true);
+  currentEffect = EffectsConfig.NONE;
+  effectValueElement.value = currentEffect.params.max;
+  noUiSlider.create(sliderElement, getSliderOptions(currentEffect));
+  sliderElementContainer.classList.add(CLASS_HIDDEN);
   effectsContainerElement.addEventListener('change', onEffectChange);
 
   sliderElement.noUiSlider.on('update', () => {
     effectValueElement.value = parseFloat(sliderElement.noUiSlider.get());
-    imageElement.style.filter = (currentEffectType !== 'none') ? `${currentEffectType}(${sliderElement.noUiSlider.get()})` : '';
+    imageElement.style.filter = (currentEffect.type !== 'none') ? `${currentEffect.type}(${sliderElement.noUiSlider.get()})` : '';
   });
 };
 
 const removeEffect = () => {
   effectsContainerElement.removeEventListener('change', onEffectChange);
-  document.getElementById('effect-none').checked = true;
+  document.getElementById(EffectsConfig.NONE.id).checked = true;
   imageElement.style.filter = '';
   sliderElement.noUiSlider.destroy();
 };

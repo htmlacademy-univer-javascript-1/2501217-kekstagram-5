@@ -1,5 +1,7 @@
 import {isEscapeKey} from './util.js';
 
+const CLASS_HIDDEN = 'hidden';
+const CLASS_MODAL_OPEN = 'modal-open';
 const COMMENTS_NUMBER_STEP = 5;
 const bigPictureElement = document.querySelector('.big-picture');
 const bigPictureCloseElement = bigPictureElement.querySelector('.big-picture__cancel');
@@ -14,11 +16,11 @@ const bigPictureCommentsCountElement = bigPictureElement.querySelector('.social_
 let currentPicture;
 let currentCommentsIndex = 0;
 
-const clearCommentsList = () => {
+const resetCommentsList = () => {
   bigPictureCommentsListElement.innerHTML = '';
 };
 
-const getCommentElement = (comment) => {
+const createCommentElement = (comment) => {
   const commentElement = bigPictureCommentTemplate.cloneNode(true);
   const commentAutorImage = commentElement.querySelector('.social__picture');
   commentAutorImage.src = comment.avatar;
@@ -28,25 +30,31 @@ const getCommentElement = (comment) => {
 };
 
 const drawComments = () => {
-  let commentIndex = 0;
-  for (let i = currentCommentsIndex; i < currentCommentsIndex + COMMENTS_NUMBER_STEP; i++) {
-    commentIndex = i;
-    bigPictureCommentsListElement.appendChild(getCommentElement(currentPicture.comments[i]));
-    if (i + 1 === currentPicture.comments.length) {
-      bigPictureCommentsLoaderElement.classList.add('hidden');
-      break;
-    }
+  const commentsFragment = document.createDocumentFragment();
+  const commentsToRender = currentPicture.comments.slice(currentCommentsIndex, currentCommentsIndex + COMMENTS_NUMBER_STEP);
+
+  commentsToRender.forEach((comment) => {
+    commentsFragment.appendChild(createCommentElement(comment));
+  });
+
+  bigPictureCommentsListElement.appendChild(commentsFragment);
+  currentCommentsIndex += commentsToRender.length;
+
+  if (currentCommentsIndex >= currentPicture.comments.length) {
+    bigPictureCommentsLoaderElement.classList.add(CLASS_HIDDEN);
+  } else {
+    bigPictureCommentsLoaderElement.classList.remove(CLASS_HIDDEN);
   }
-  currentCommentsIndex = commentIndex + 1;
+
   bigPictureCommentsCountElement.innerHTML = `${currentCommentsIndex} из <span class="comments-count">${currentPicture.comments.length}</span> комментариев`;
 };
 
-const changeBigPicture = () => {
+const updateBigPicture = () => {
   bigPictureImage.src = currentPicture.url;
   bigPictureLikesCountElement.textContent = currentPicture.likes;
   bigPictureDescriptionElement.textContent = currentPicture.description;
 
-  clearCommentsList();
+  resetCommentsList();
   drawComments();
 };
 
@@ -63,18 +71,18 @@ const onCommentsLoaderElementClick = () => drawComments();
 const openBigPicture = (picture) => {
   currentPicture = picture;
   currentCommentsIndex = 0;
-  changeBigPicture();
+  updateBigPicture();
   document.addEventListener('keydown', onDocumentKeydown);
   bigPictureCloseElement.addEventListener('click', onCloseElementClick);
   bigPictureCommentsLoaderElement.addEventListener('click', onCommentsLoaderElementClick);
-  document.body.classList.add('modal-open');
-  bigPictureElement.classList.remove('hidden');
+  document.body.classList.add(CLASS_MODAL_OPEN);
+  bigPictureElement.classList.remove(CLASS_HIDDEN);
 };
 
 function closeBigPicture () {
-  bigPictureElement.classList.add('hidden');
-  document.body.classList.remove('modal-open');
-  bigPictureCommentsLoaderElement.classList.remove('hidden');
+  bigPictureElement.classList.add(CLASS_HIDDEN);
+  document.body.classList.remove(CLASS_MODAL_OPEN);
+  bigPictureCommentsLoaderElement.classList.remove(CLASS_HIDDEN);
   document.removeEventListener('keydown', onDocumentKeydown);
   bigPictureCloseElement.removeEventListener('click', onCloseElementClick);
   bigPictureCommentsLoaderElement.removeEventListener('click', onCommentsLoaderElementClick);

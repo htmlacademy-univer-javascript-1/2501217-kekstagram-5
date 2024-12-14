@@ -6,7 +6,7 @@ const getRandomInteger = (min, max) => {
   return Math.floor(Math.random() * (upper - lower + 1) + lower);
 };
 
-const checkRepeats = (arr) => new Set(arr).size !== arr.length;
+const checkForDuplicates = (arr) => new Set(arr).size !== arr.length;
 
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
@@ -36,14 +36,12 @@ const getArrayRandomSample = (array, sampleSize) => {
     return array.slice();
   }
 
-  const temporaryArray = array.slice();
-  const sample = [];
-  for (let i = 0; i < sampleSize; i++) {
-    const randomIndex = getRandomInteger(0, temporaryArray.length - 1);
-    sample.push(temporaryArray[randomIndex]);
-    temporaryArray.splice(randomIndex, 1);
+  const shuffled = array.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const randomIndex = getRandomInteger(0, i);
+    [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
   }
-  return sample;
+  return shuffled.slice(0, sampleSize);
 };
 
 const debounce = (cb, timeoutDelay) => {
@@ -54,4 +52,4 @@ const debounce = (cb, timeoutDelay) => {
   };
 };
 
-export {checkRepeats, isEscapeKey, showAlert, getArrayRandomSample, debounce};
+export {checkForDuplicates, isEscapeKey, showAlert, getArrayRandomSample, debounce};

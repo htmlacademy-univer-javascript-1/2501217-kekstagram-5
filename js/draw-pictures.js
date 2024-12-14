@@ -3,15 +3,10 @@ import {openBigPicture} from './draw-big-picture.js';
 const picturesListElement = document.querySelector('.pictures');
 const pictureTemplate = document.getElementById('picture').content.querySelector('.picture');
 
-const getPictureClickHandler = (pictures) => (evt) => {
-  const pictureElement = evt.target.closest('.picture');
-  if (pictureElement) {
-    const picture = pictures.find((pic) => pic.url === pictureElement.querySelector('.picture__img').getAttribute('src'));
-    openBigPicture(picture);
-  }
-};
+let currentPictures = [];
 
 const renderPictures = (pictures) => {
+  currentPictures = pictures;
   const picturesListFragment = document.createDocumentFragment();
 
   pictures.forEach(({url, description, likes, comments}) => {
@@ -24,9 +19,16 @@ const renderPictures = (pictures) => {
     picturesListFragment.appendChild(pictureElement);
   });
 
+  picturesListElement.querySelectorAll('.picture').forEach((picture) => picture.remove());
   picturesListElement.appendChild(picturesListFragment);
-  const onPictureClick = getPictureClickHandler(pictures);
-  picturesListElement.addEventListener('click', onPictureClick);
 };
+
+picturesListElement.addEventListener('click', (evt) => {
+  const pictureElement = evt.target.closest('.picture');
+  if (pictureElement) {
+    const picture = currentPictures.find((pic) => pic.url === pictureElement.querySelector('.picture__img').getAttribute('src'));
+    openBigPicture(picture);
+  }
+});
 
 export {renderPictures};

@@ -2,6 +2,11 @@ import {isEscapeKey} from './util.js';
 import {sendData} from './api.js';
 import {closeEditingImageForm, onDocumentKeydown} from './form.js';
 
+const CLASS_SUCCESS_CONTAINER = 'success__inner';
+const CLASS_ERROR_CONTAINER = 'error__inner';
+const TEXT_SUBMIT_LOADING = 'Публикация...';
+const TEXT_SUBMIT_DEFAULT = 'Опубликовать';
+
 const uploadForm = document.getElementById('upload-select-image');
 const editingImageForm = uploadForm.querySelector('.img-upload__overlay');
 const submitFormElement = editingImageForm.querySelector('.img-upload__submit');
@@ -12,33 +17,33 @@ const errorCloseElement = errorForm.querySelector('.error__button');
 
 const blockSubmitFormElement = () => {
   submitFormElement.disabled = true;
-  submitFormElement.textContent = 'Публикация...';
+  submitFormElement.textContent = TEXT_SUBMIT_LOADING;
 };
 
 const unblockSubmitFormElement = () => {
   submitFormElement.disabled = false;
-  submitFormElement.textContent = 'Опубликовать';
+  submitFormElement.textContent = TEXT_SUBMIT_DEFAULT;
 };
 
-const getOutsideFormClickHandler = (className, cb) => (evt) => {
+const createClickOutsideHandler = (className, cb) => (evt) => {
   if (evt.target.closest(`.${className}`) === null) {
     cb();
   }
 };
 
-const getKeydownHandler = (cb) => (evt) => {
+const createEscapeKeyHandler = (cb) => (evt) => {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
     cb();
   }
 };
 
-const onOutsideSuccessFormClick = getOutsideFormClickHandler('success__inner', hideSuccessForm);
-const onOutsideErrorFormClick = getOutsideFormClickHandler('error__inner', hideErrorForm);
+const onOutsideSuccessFormClick = createClickOutsideHandler(CLASS_SUCCESS_CONTAINER, hideSuccessForm);
+const onOutsideErrorFormClick = createClickOutsideHandler(CLASS_ERROR_CONTAINER, hideErrorForm);
 const onErrorCloseElementClick = () => hideErrorForm();
 const onSuccessCloseElementClick = () => hideSuccessForm();
-const onSuccessFormKeydown = getKeydownHandler(hideSuccessForm);
-const onErrorFormKeydown = getKeydownHandler(hideErrorForm);
+const onSuccessFormKeydown = createEscapeKeyHandler(hideSuccessForm);
+const onErrorFormKeydown = createEscapeKeyHandler(hideErrorForm);
 
 function hideSuccessForm () {
   document.removeEventListener('click', onOutsideSuccessFormClick);

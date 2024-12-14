@@ -1,8 +1,11 @@
-import {checkRepeats, isEscapeKey} from './util.js';
+import {checkForDuplicates, isEscapeKey} from './util.js';
 import {addEffect, removeEffect} from './effects.js';
-import {addEventListenerToScaleElements, removeEventListenerFromScaleElements, setStandartImageSize} from './scale.js';
+import {addEventListenerToScaleElements, removeEventListenerFromScaleElements, resetImageScale} from './scale.js';
 import './send-form.js';
 
+const CLASS_HIDDEN = 'hidden';
+const CLASS_MODAL_OPEN = 'modal-open';
+const STYLE_BACKGROUND_IMAGE = 'background-image';
 const DEFAULT_PHOTO = 'img/upload-default-image.jpg';
 const ALLOWED_FILE_TYPES = ['jpg', 'jpeg', 'png'];
 const MAX_LENGTH_COMMENT = 140;
@@ -39,28 +42,22 @@ const isHashtagValid = (hashtagString) => {
 
   const hashtags = hashtagString.split(/\s+/);
 
-  if (hashtags.length === 0) {
-    return true;
+  if (hashtags.length > MAX_HASHTAGS_COUNT) {
+    messageHashtagError = `Превышено допустимое количество хэш-тегов: ${MAX_HASHTAGS_COUNT}!`;
+    return false;
   }
 
-  if (checkRepeats(hashtags)) {
+  if (hashtags.some((hashtag) => !HASHTAG_RE.test(hashtag))) {
+    messageHashtagError = 'Введён невалидный хэш-тег!';
+    return false;
+  }
+
+  if (checkForDuplicates(hashtags)) {
     messageHashtagError = 'Хэш-теги не должны повторяться!';
     return false;
   }
 
-  const isNotValid = hashtags.some((hashtag) => {
-    if (!HASHTAG_RE.test(hashtag)) {
-      messageHashtagError = 'Введён невалидный хэш-тег!';
-      return true;
-    }
-    if (hashtags.length > MAX_HASHTAGS_COUNT) {
-      messageHashtagError = `Превышено допустимое количество хэш-тегов: ${MAX_HASHTAGS_COUNT}!`;
-      return true;
-    }
-    return false;
-  });
-
-  return !isNotValid;
+  return true;
 };
 
 const onFormInputElementInput = () => {
@@ -72,7 +69,7 @@ const isDescriptionValid = (descriptionString) => descriptionString.length <= MA
 const getMessageHashtagError = () => messageHashtagError;
 
 pristine.addValidator(hashtagsInputElement, isHashtagValid, getMessageHashtagError);
-pristine.addValidator(descriptionInputElement, isDescriptionValid, `Длина комментария не может составлять больше ${MAX_LENGTH_COMMENT} символов`);
+pristine.addValidator(descriptionInputElement, isDescriptionValid, `Длина комментария не может составлять больше ${MAX_LENGTH_COMMENT} символов!`);
 
 const onDocumentKeydown = (evt) => {
   if (isEscapeKey(evt) && evt.target !== hashtagsInputElement && evt.target !== descriptionInputElement) {
@@ -83,18 +80,18 @@ const onDocumentKeydown = (evt) => {
 const onCloseFormElementClick = () => closeEditingImageForm();
 
 function closeEditingImageForm () {
-  editingImageForm.classList.add('hidden');
-  document.body.classList.remove('modal-open');
+  editingImageForm.classList.add(CLASS_HIDDEN);
+  document.body.classList.remove(CLASS_MODAL_OPEN);
 
   submitFormElement.disabled = false;
   inputImageElement.value = '';
   imagePreviewElement.src = DEFAULT_PHOTO;
   effectsPreviewElements.forEach((preview) => {
-    preview.style.removeProperty('background-image');
+    preview.style.removeProperty(STYLE_BACKGROUND_IMAGE);
   });
 
   removeEffect();
-  setStandartImageSize();
+  resetImageScale();
   removeEventListenerFromScaleElements();
 
   closeFormElement.removeEventListener('click', onCloseFormElementClick);
@@ -110,9 +107,10 @@ const openEditingImageForm = () => {
   const image = inputImageElement.files[0];
 
   if (ALLOWED_FILE_TYPES.some((it) => image.name.toLowerCase().endsWith(it))) {
-    imagePreviewElement.src = URL.createObjectURL(image);
+    const imageURL = URL.createObjectURL(image);
+    imagePreviewElement.src = imageURL;
     effectsPreviewElements.forEach((preview) => {
-      preview.style.backgroundImage = `url('${URL.createObjectURL(image)}')`;
+      preview.style.backgroundImage = `url('${imageURL}')`;
     });
   }
 
@@ -124,8 +122,8 @@ const openEditingImageForm = () => {
   hashtagsInputElement.addEventListener('input', onFormInputElementInput);
   descriptionInputElement.addEventListener('input', onFormInputElementInput);
 
-  document.body.classList.add('modal-open');
-  editingImageForm.classList.remove('hidden');
+  document.body.classList.add(CLASS_MODAL_OPEN);
+  editingImageForm.classList.remove(CLASS_HIDDEN);
 };
 
 const onInputImageElementChange = () => openEditingImageForm();
