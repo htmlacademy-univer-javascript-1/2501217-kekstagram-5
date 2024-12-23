@@ -2,9 +2,9 @@ const CLASS_HIDDEN = 'hidden';
 
 const imageElement = document.querySelector('.img-upload__preview img');
 const effectsContainerElement = document.querySelector('.effects__list');
-const sliderElementContainer = document.querySelector('.img-upload__effect-level');
-const sliderElement = sliderElementContainer.querySelector('.effect-level__slider');
-const effectValueElement = sliderElementContainer.querySelector('.effect-level__value');
+const sliderContainerElement = document.querySelector('.img-upload__effect-level');
+const sliderElement = sliderContainerElement.querySelector('.effect-level__slider');
+const effectValueElement = sliderContainerElement.querySelector('.effect-level__value');
 
 const EffectsConfig = {
   NONE: {
@@ -66,9 +66,9 @@ const getSliderOptions = ({ params, format, parse }) => ({
 
 const setEffectParams = (effect) => {
   if (effect.type === 'none') {
-    sliderElementContainer.classList.add(CLASS_HIDDEN);
+    sliderContainerElement.classList.add(CLASS_HIDDEN);
   } else {
-    sliderElementContainer.classList.remove(CLASS_HIDDEN);
+    sliderContainerElement.classList.remove(CLASS_HIDDEN);
   }
 
   currentEffect = effect;
@@ -83,7 +83,7 @@ const addEffect = () => {
   currentEffect = EffectsConfig.NONE;
   effectValueElement.value = currentEffect.params.max;
   noUiSlider.create(sliderElement, getSliderOptions(currentEffect));
-  sliderElementContainer.classList.add(CLASS_HIDDEN);
+  sliderContainerElement.classList.add(CLASS_HIDDEN);
   effectsContainerElement.addEventListener('change', onEffectChange);
 
   sliderElement.noUiSlider.on('update', () => {

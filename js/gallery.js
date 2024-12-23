@@ -26,7 +26,7 @@ const getFilteredPictures = (pictures) => {
 getData()
   .then((pictures) => {
     renderPictures(pictures);
-    const onFilterClick = debounce((evt) => {
+    const onFilterElementClick = debounce((evt) => {
       if (evt.target.classList.contains('img-filters__button')) {
         selectedFilterElement.classList.remove(FILTER_ELEMENT_ACTIVE_CLASS);
         selectedFilterId = evt.target.id;
@@ -35,7 +35,7 @@ getData()
         renderPictures(getFilteredPictures(pictures));
       }
     }, TIMEOUT_DELAY);
-    document.querySelector('.img-filters').addEventListener('click', onFilterClick);
+    document.querySelector('.img-filters').addEventListener('click', onFilterElementClick);
     document.querySelector('.img-filters').classList.remove('img-filters--inactive');
   })
   .catch((err) => showAlert(err.message));
