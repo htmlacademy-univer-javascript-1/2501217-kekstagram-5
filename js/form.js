@@ -1,6 +1,6 @@
 import {checkForDuplicates, isEscapeKey} from './util.js';
 import {addEffect, removeEffect} from './effects.js';
-import {addEventListenerToScaleElements, removeEventListenerFromScaleElements, resetImageScale} from './scale.js';
+import {addEventListenersToScaleElements, removeEventListenersFromScaleElements, resetImageElementScale} from './scale.js';
 import './send-form.js';
 
 const CLASS_HIDDEN = 'hidden';
@@ -13,17 +13,17 @@ const MAX_HASHTAGS_COUNT = 5;
 const HASHTAG_RE = /^#[A-Za-zА-Яа-я0-9]{1,19}$/;
 const PRISTINE_ERROR_CLASS = 'upload-form__error-text';
 
-const uploadForm = document.getElementById('upload-select-image');
-const imagePreviewElement = uploadForm.querySelector('.img-upload__preview img');
-const effectsPreviewElements = uploadForm.querySelectorAll('.effects__preview');
-const inputImageElement = uploadForm.querySelector('.img-upload__input');
-const editingImageForm = uploadForm.querySelector('.img-upload__overlay');
-const closeFormElement = editingImageForm.querySelector('.img-upload__cancel');
-const submitFormElement = editingImageForm.querySelector('.img-upload__submit');
-const hashtagsInputElement = uploadForm.querySelector('.text__hashtags');
-const descriptionInputElement = uploadForm.querySelector('.text__description');
+const uploadFormElement = document.getElementById('upload-select-image');
+const imagePreviewElement = uploadFormElement.querySelector('.img-upload__preview img');
+const effectsPreviewElements = uploadFormElement.querySelectorAll('.effects__preview');
+const inputImageElement = uploadFormElement.querySelector('.img-upload__input');
+const editingImageFormElement = uploadFormElement.querySelector('.img-upload__overlay');
+const closeFormElement = editingImageFormElement.querySelector('.img-upload__cancel');
+const submitFormElement = editingImageFormElement.querySelector('.img-upload__submit');
+const hashtagsInputElement = uploadFormElement.querySelector('.text__hashtags');
+const descriptionInputElement = uploadFormElement.querySelector('.text__description');
 
-const pristine = new Pristine(uploadForm, {
+const pristine = new Pristine(uploadFormElement, {
   classTo: 'img-upload__field-wrapper',
   errorTextParent: 'img-upload__field-wrapper',
   errorTextTag: 'div',
@@ -73,14 +73,14 @@ pristine.addValidator(descriptionInputElement, isDescriptionValid, `Длина �
 
 const onDocumentKeydown = (evt) => {
   if (isEscapeKey(evt) && evt.target !== hashtagsInputElement && evt.target !== descriptionInputElement) {
-    closeEditingImageForm();
+    closeEditingImageFormElement();
   }
 };
 
-const onCloseFormElementClick = () => closeEditingImageForm();
+const onCloseFormElementClick = () => closeEditingImageFormElement();
 
-function closeEditingImageForm () {
-  editingImageForm.classList.add(CLASS_HIDDEN);
+function closeEditingImageFormElement () {
+  editingImageFormElement.classList.add(CLASS_HIDDEN);
   document.body.classList.remove(CLASS_MODAL_OPEN);
 
   submitFormElement.disabled = false;
@@ -91,19 +91,19 @@ function closeEditingImageForm () {
   });
 
   removeEffect();
-  resetImageScale();
-  removeEventListenerFromScaleElements();
+  resetImageElementScale();
+  removeEventListenersFromScaleElements();
 
   closeFormElement.removeEventListener('click', onCloseFormElementClick);
   document.removeEventListener('keydown', onDocumentKeydown);
   hashtagsInputElement.removeEventListener('input', onFormInputElementInput);
   descriptionInputElement.removeEventListener('input', onFormInputElementInput);
 
-  uploadForm.reset();
+  uploadFormElement.reset();
   pristine.reset();
 }
 
-const openEditingImageForm = () => {
+const openEditingImageFormElement = () => {
   const image = inputImageElement.files[0];
 
   if (ALLOWED_FILE_TYPES.some((it) => image.name.toLowerCase().endsWith(it))) {
@@ -115,7 +115,7 @@ const openEditingImageForm = () => {
   }
 
   addEffect();
-  addEventListenerToScaleElements();
+  addEventListenersToScaleElements();
 
   closeFormElement.addEventListener('click', onCloseFormElementClick);
   document.addEventListener('keydown', onDocumentKeydown);
@@ -123,11 +123,11 @@ const openEditingImageForm = () => {
   descriptionInputElement.addEventListener('input', onFormInputElementInput);
 
   document.body.classList.add(CLASS_MODAL_OPEN);
-  editingImageForm.classList.remove(CLASS_HIDDEN);
+  editingImageFormElement.classList.remove(CLASS_HIDDEN);
 };
 
-const onInputImageElementChange = () => openEditingImageForm();
+const onInputImageElementChange = () => openEditingImageFormElement();
 
 inputImageElement.addEventListener('change', onInputImageElementChange);
 
-export {closeEditingImageForm, onDocumentKeydown};
+export {closeEditingImageFormElement, onDocumentKeydown};

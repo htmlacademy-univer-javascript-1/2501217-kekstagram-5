@@ -22,19 +22,19 @@ const updateScale = (direction) => {
 const onZoomOutElementClick = () => updateScale(-1);
 const onZoomInElementClick = () => updateScale(1);
 
-const addEventListenerToScaleElements = () => {
+const addEventListenersToScaleElements = () => {
   zoomOutElement.addEventListener('click', onZoomOutElementClick);
   zoomInElement.addEventListener('click', onZoomInElementClick);
 };
 
-const removeEventListenerFromScaleElements = () => {
+const removeEventListenersFromScaleElements = () => {
   zoomOutElement.removeEventListener('click', onZoomOutElementClick);
   zoomInElement.removeEventListener('click', onZoomInElementClick);
 };
 
-const resetImageScale = () => {
+const resetImageElementScale = () => {
   imageElement.style.transform = `scale(${DEFAULT_SCALE / 100})`;
   scaleValueElement.value = `${DEFAULT_SCALE}%`;
 };
 
-export {addEventListenerToScaleElements, removeEventListenerFromScaleElements, resetImageScale};
+export {addEventListenersToScaleElements, removeEventListenersFromScaleElements, resetImageElementScale};
